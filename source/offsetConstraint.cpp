@@ -17,7 +17,7 @@
 
 #define MSTR(v) MString(to_string(v).c_str())
 
-MTypeId OffsetConstraint::typeId(0x1000);
+MTypeId OffsetConstraint::typeId(1274449);
 MObject OffsetConstraint::attr_target;
 MObject OffsetConstraint::attr_targetWeight;
 MObject OffsetConstraint::attr_targetMatrix;
