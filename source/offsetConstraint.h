@@ -46,6 +46,9 @@ public:
 	static MObject attr_constraintJointOrient;
 	static MObject attr_constraintRotateOrder;
 	static MObject attr_offsetOrParentBlend;
+	static MObject attr_constraintTranslateX;
+	static MObject attr_constraintTranslateY;
+	static MObject attr_constraintTranslateZ;
 	static MObject attr_constraintTranslate;
 	static MObject attr_constraintRotateX;
 	static MObject attr_constraintRotateY;

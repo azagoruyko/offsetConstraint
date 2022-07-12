@@ -30,6 +30,9 @@ MObject OffsetConstraint::attr_constraintJointOrientZ;
 MObject OffsetConstraint::attr_constraintJointOrient;
 MObject OffsetConstraint::attr_constraintRotateOrder;
 MObject OffsetConstraint::attr_offsetOrParentBlend;
+MObject OffsetConstraint::attr_constraintTranslateX;
+MObject OffsetConstraint::attr_constraintTranslateY;
+MObject OffsetConstraint::attr_constraintTranslateZ;
 MObject OffsetConstraint::attr_constraintTranslate;
 MObject OffsetConstraint::attr_constraintRotateX;
 MObject OffsetConstraint::attr_constraintRotateY;
@@ -137,7 +140,7 @@ struct TargetData
 
 MStatus OffsetConstraint::compute(const MPlug& plug, MDataBlock& dataBlock)
 {
-	if (plug == attr_constraintTranslate || plug == attr_constraintRotate)
+	if (plug == attr_constraintTranslate || plug == attr_constraintRotate || plug.parent() == attr_constraintTranslate || plug.parent() == attr_constraintRotate)
 	{
 		const MMatrix constraintParentInverseMatrix = dataBlock.inputValue(attr_constraintParentInverseMatrix).asMatrix();
 		const MMatrix constraintMatrixBase = dataBlock.inputValue(attr_constraintMatrixBase).asMatrix();
@@ -155,9 +158,6 @@ MStatus OffsetConstraint::compute(const MPlug& plug, MDataBlock& dataBlock)
 		MTransformationMatrix joTrm;
 		joTrm.rotateBy(MEulerRotation(constraintJointOrient, (MEulerRotation::RotationOrder)constraintRotateOrder), MSpace::kWorld);
 		const MMatrix jomatInverse = joTrm.asMatrixInverse();
-
-		MMatrix constraintMatrixBaseWithoutJo = constraintMatrixBase * jomatInverse;
-		set_maxis(constraintMatrixBaseWithoutJo, 3, taxis(constraintMatrixBase));
 
 		double weightSum = 1e-5;
 		vector<TargetData> targetDataList(targetArrayHandle.elementCount());
@@ -212,7 +212,7 @@ MStatus OffsetConstraint::compute(const MPlug& plug, MDataBlock& dataBlock)
 				outputQuat = slerp(outputQuat, mat2quat(finalMat), targetWeight);
 		}
 
-		dataBlock.outputValue(attr_constraintTranslate).setMVector(outputTranslate);
+		dataBlock.outputValue(attr_constraintTranslate).set(outputTranslate);
 
 		MEulerRotation euler = outputQuat.asEulerRotation();
 		euler.reorderIt((MEulerRotation::RotationOrder)constraintRotateOrder);
@@ -298,7 +298,10 @@ MStatus OffsetConstraint::initialize()
 	nAttr.setKeyable(true);
 	addAttribute(attr_offsetOrParentBlend);
 
-	attr_constraintTranslate = nAttr.create("constraintTranslate", "ct", MFnNumericData::k3Double);
+	attr_constraintTranslateX = nAttr.create("constraintTranslateX", "ctx", MFnNumericData::kDouble);
+	attr_constraintTranslateY = nAttr.create("constraintTranslateY", "cty", MFnNumericData::kDouble);
+	attr_constraintTranslateZ = nAttr.create("constraintTranslateZ", "ctz", MFnNumericData::kDouble);
+	attr_constraintTranslate = nAttr.create("constraintTranslate", "ct", attr_constraintTranslateX, attr_constraintTranslateY, attr_constraintTranslateZ);
 	nAttr.setHidden(true);
 	nAttr.setReadable(true);
 	nAttr.setWritable(false);
@@ -395,12 +398,25 @@ MStatus OffsetConstraintCommand::connectObjectAndConstraint(MDGModifier& modifie
 	status = connectObjectAttribute(MPxTransform::parentInverseMatrix, OffsetConstraint::attr_constraintParentInverseMatrix, true, true);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	status = connectObjectAttribute(MPxTransform::translate, OffsetConstraint::attr_constraintTranslate, false, false);
+	// outputs
+	status = connectObjectAttribute(MPxTransform::translateX, OffsetConstraint::attr_constraintTranslateX, false, false);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	status = connectObjectAttribute(MPxTransform::rotate, OffsetConstraint::attr_constraintRotate, false, false);
+	status = connectObjectAttribute(MPxTransform::translateY, OffsetConstraint::attr_constraintTranslateY, false, false);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
-	
+
+	status = connectObjectAttribute(MPxTransform::translateZ, OffsetConstraint::attr_constraintTranslateZ, false, false);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	status = connectObjectAttribute(MPxTransform::rotateX, OffsetConstraint::attr_constraintRotateX, false, false);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	status = connectObjectAttribute(MPxTransform::rotateY, OffsetConstraint::attr_constraintRotateY, false, false);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	status = connectObjectAttribute(MPxTransform::rotateZ, OffsetConstraint::attr_constraintRotateZ, false, false);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
 	return MS::kSuccess;
 }
 
