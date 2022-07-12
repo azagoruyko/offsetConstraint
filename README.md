@@ -1,9 +1,9 @@
 **Offset Constraint** is a constraint for Maya that can be used in retargeting. It works very simple but it's quite strange Maya doesn't have a such one.
 
 Compare formulas:<br>
-```
+```python
 parentConstraint = destBase * srcBase.inverse() * src
-offsetConstraint = src * srcBase.inverse() * destBase
+offsetConstraint = src * srcBase.inverse() * destBase # src and dest should have the same axes here
 ```
 
 Here is the difference between pointConstraint (with maintainOffset) + orientConstraint (right) and offsetConstraint (left, selected). <br>
