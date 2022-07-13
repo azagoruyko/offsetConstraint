@@ -399,23 +399,23 @@ MStatus OffsetConstraintCommand::connectObjectAndConstraint(MDGModifier& modifie
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	// outputs
-	status = connectObjectAttribute(MPxTransform::translateX, OffsetConstraint::attr_constraintTranslateX, false, false);
-	CHECK_MSTATUS_AND_RETURN_IT(status);
+	if (!transformFn.findPlug(MPxTransform::translateX).isLocked())
+		CHECK_MSTATUS_AND_RETURN_IT(connectObjectAttribute(MPxTransform::translateX, OffsetConstraint::attr_constraintTranslateX, false, false));
 
-	status = connectObjectAttribute(MPxTransform::translateY, OffsetConstraint::attr_constraintTranslateY, false, false);
-	CHECK_MSTATUS_AND_RETURN_IT(status);
+	if (!transformFn.findPlug(MPxTransform::translateY).isLocked())
+		CHECK_MSTATUS_AND_RETURN_IT(connectObjectAttribute(MPxTransform::translateY, OffsetConstraint::attr_constraintTranslateY, false, false));
 
-	status = connectObjectAttribute(MPxTransform::translateZ, OffsetConstraint::attr_constraintTranslateZ, false, false);
-	CHECK_MSTATUS_AND_RETURN_IT(status);
+	if (!transformFn.findPlug(MPxTransform::translateZ).isLocked())
+		CHECK_MSTATUS_AND_RETURN_IT(connectObjectAttribute(MPxTransform::translateZ, OffsetConstraint::attr_constraintTranslateZ, false, false));
 
-	status = connectObjectAttribute(MPxTransform::rotateX, OffsetConstraint::attr_constraintRotateX, false, false);
-	CHECK_MSTATUS_AND_RETURN_IT(status);
+	if (!transformFn.findPlug(MPxTransform::rotateX).isLocked())
+		CHECK_MSTATUS_AND_RETURN_IT(connectObjectAttribute(MPxTransform::rotateX, OffsetConstraint::attr_constraintRotateX, false, false));
 
-	status = connectObjectAttribute(MPxTransform::rotateY, OffsetConstraint::attr_constraintRotateY, false, false);
-	CHECK_MSTATUS_AND_RETURN_IT(status);
+	if (!transformFn.findPlug(MPxTransform::rotateY).isLocked())
+		CHECK_MSTATUS_AND_RETURN_IT(connectObjectAttribute(MPxTransform::rotateY, OffsetConstraint::attr_constraintRotateY, false, false));
 
-	status = connectObjectAttribute(MPxTransform::rotateZ, OffsetConstraint::attr_constraintRotateZ, false, false);
-	CHECK_MSTATUS_AND_RETURN_IT(status);
+	if (!transformFn.findPlug(MPxTransform::rotateZ).isLocked())
+		CHECK_MSTATUS_AND_RETURN_IT(connectObjectAttribute(MPxTransform::rotateZ, OffsetConstraint::attr_constraintRotateZ, false, false));
 
 	return MS::kSuccess;
 }
