@@ -22,6 +22,7 @@ MObject OffsetConstraint::attr_target;
 MObject OffsetConstraint::attr_targetWeight;
 MObject OffsetConstraint::attr_targetMatrix;
 MObject OffsetConstraint::attr_targetMatrixBase;
+MObject OffsetConstraint::attr_targetsParentInverseMatrix;
 MObject OffsetConstraint::attr_constraintParentInverseMatrix;
 MObject OffsetConstraint::attr_constraintMatrixBase;
 MObject OffsetConstraint::attr_constraintJointOrientX;
@@ -142,6 +143,7 @@ MStatus OffsetConstraint::compute(const MPlug& plug, MDataBlock& dataBlock)
 {
 	if (plug == attr_constraintTranslate || plug == attr_constraintRotate || plug.parent() == attr_constraintTranslate || plug.parent() == attr_constraintRotate)
 	{
+		const MMatrix targetsParentInverseMatrix = dataBlock.inputValue(attr_targetsParentInverseMatrix).asMatrix();
 		const MMatrix constraintParentInverseMatrix = dataBlock.inputValue(attr_constraintParentInverseMatrix).asMatrix();
 		const MMatrix constraintMatrixBase = dataBlock.inputValue(attr_constraintMatrixBase).asMatrix();
 		const MVector constraintJointOrient = dataBlock.inputValue(attr_constraintJointOrient).asVector();
@@ -192,12 +194,12 @@ MStatus OffsetConstraint::compute(const MPlug& plug, MDataBlock& dataBlock)
 
 			const MMatrix offsetInTarget = movedConstraintBase * targetMatrixBaseInverse;
 			const MMatrix offsetConstraintMatrix =
-				(offsetInTarget * targetMatrix) *
+				(offsetInTarget * targetMatrix * targetsParentInverseMatrix) *
 				(offsetInTarget * targetMatrixBase).inverse() *
 				constraintMatrixBase *
 				constraintParentInverseMatrix;
 
-			const MMatrix parentConstraintMatrix = constraintMatrixBase * targetMatrixBaseInverse * targetMatrix * constraintParentInverseMatrix;
+			const MMatrix parentConstraintMatrix = (constraintMatrixBase * targetMatrixBaseInverse) * (targetMatrix * targetsParentInverseMatrix) * constraintParentInverseMatrix;
 
 			const MMatrix blendedMatrix = blendMatrices(offsetConstraintMatrix, parentConstraintMatrix, offsetOrParentBlend);
 
@@ -272,6 +274,11 @@ MStatus OffsetConstraint::initialize()
 	cAttr.setDisconnectBehavior(MFnAttribute::kDelete);
 	addAttribute(attr_target);
 
+	
+	attr_targetsParentInverseMatrix = mAttr.create("targetsParentInverseMatrix", "tpim");
+	mAttr.setHidden(true);
+	addAttribute(attr_targetsParentInverseMatrix);
+
 
 	attr_constraintParentInverseMatrix = mAttr.create("constraintParentInverseMatrix", "cpim");
 	mAttr.setHidden(true);
@@ -320,6 +327,7 @@ MStatus OffsetConstraint::initialize()
 	attributeAffects(attr_targetWeight, attr_constraintTranslate);
 	attributeAffects(attr_targetMatrix, attr_constraintTranslate);
 	attributeAffects(attr_targetMatrixBase, attr_constraintTranslate);
+	attributeAffects(attr_targetsParentInverseMatrix, attr_constraintTranslate);
 	attributeAffects(attr_constraintMatrixBase, attr_constraintTranslate);
 	attributeAffects(attr_constraintParentInverseMatrix, attr_constraintTranslate);
 	attributeAffects(attr_constraintJointOrient, attr_constraintTranslate);
@@ -330,6 +338,7 @@ MStatus OffsetConstraint::initialize()
 	attributeAffects(attr_targetWeight, attr_constraintRotate);
 	attributeAffects(attr_targetMatrix, attr_constraintRotate);
 	attributeAffects(attr_targetMatrixBase, attr_constraintRotate);
+	attributeAffects(attr_targetsParentInverseMatrix, attr_constraintRotate);
 	attributeAffects(attr_constraintParentInverseMatrix, attr_constraintRotate);
 	attributeAffects(attr_constraintMatrixBase, attr_constraintRotate);
 	attributeAffects(attr_constraintJointOrient, attr_constraintRotate);

@@ -38,6 +38,7 @@ public:
 	static MObject attr_targetWeight;
 	static MObject attr_targetMatrix;
 	static MObject attr_targetMatrixBase;
+	static MObject attr_targetsParentInverseMatrix;
 	static MObject attr_constraintParentInverseMatrix;
 	static MObject attr_constraintMatrixBase;
 	static MObject attr_constraintJointOrientX;
